@@ -1,0 +1,32 @@
+@page
+@model AUTODOK.Pages.Admin.BookingsModel
+@{ ViewData["Title"] = "New booking"; }
+<a class="back-link" asp-page="/Admin/Reservations">← Back to reservations</a>
+<div class="admin-page-heading"><div><h1>New booking</h1><p>Create a new car rental booking for your customer.</p></div></div>
+<ol class="booking-steps" aria-label="Booking steps"><li class="active"><b>1</b><span>Select vehicle</span></li><li><b>2</b><span>Customer details</span></li><li><b>3</b><span>Rental period</span></li><li><b>4</b><span>Payment</span></li><li><b>5</b><span>Confirmation</span></li></ol>
+<div class="admin-booking-layout">
+    <form method="post" class="admin-panel admin-booking-form" data-admin-booking>
+        <div asp-validation-summary="ModelOnly" class="validation" role="alert"></div>
+        <section class="wizard-step" data-step="0"><h2>1. Select vehicle</h2><p class="muted">Only available cars can be booked.</p>
+            <div class="booking-vehicle-list">
+            @foreach (Car car in Model.Vehicles)
+            {
+                <label class="booking-car-option"><input asp-for="Input.CarId" type="radio" value="@car.CarID" data-price="@car.PricePerDay.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-name="@car.DisplayName" data-category="@car.Category" data-slot="@car.ImageSlot" required /><span class="booking-option-photo photo-@car.ImageSlot"></span><span class="booking-option-info"><strong>@car.DisplayName</strong><small>@car.Category · @car.Seats seats · @car.Transmission</small><em class="availability is-available">Available</em></span><span class="booking-option-price"><strong>₱@car.PricePerDay.ToString("N0")</strong><small>/ day</small></span></label>
+            }
+            @if (Model.Vehicles.Count == 0) { <div class="empty-state"><h3>No cars available</h3><p>Return a rented car or add a new vehicle first.</p></div> }
+            </div>
+        </section>
+        <section class="wizard-step" data-step="1" hidden><h2>2. Customer details</h2><p class="muted">Choose an existing customer or enter a new driver.</p>
+            <div class="admin-form wizard-fields"><label class="span-all">Existing customer (optional)<select data-existing-customer><option value="">Enter a new customer</option>@foreach (Customer person in Model.People) { <option value="@person.CustomerID" data-name="@person.FullName" data-phone="@person.Phone" data-license="@person.LicenseNumber">@person.FullName · @person.Phone</option> }</select></label><label>Full name<input asp-for="Input.FullName" required /></label><label>Phone number<input asp-for="Input.Phone" required /></label><label>License number<input asp-for="Input.LicenseNumber" required /></label></div>
+        </section>
+        <section class="wizard-step" data-step="2" hidden><h2>3. Rental period</h2><p class="muted">Select the dates and pickup/return locations.</p>
+            <div class="admin-form wizard-fields"><label>Pickup date<input asp-for="Input.PickupDate" type="date" asp-format="{0:yyyy-MM-dd}" required /></label><label>Return date<input asp-for="Input.ReturnDate" type="date" asp-format="{0:yyyy-MM-dd}" required /></label><label>Pickup location<select asp-for="Input.PickupLocation"><option>Davao City</option><option>Tagum City</option><option>Panabo City</option></select></label><label>Return location<select asp-for="Input.ReturnLocation"><option>Davao City</option><option>Tagum City</option><option>Panabo City</option></select></label></div>
+        </section>
+        <section class="wizard-step" data-step="3" hidden><h2>4. Payment</h2><p class="muted">This records the payment choice; no payment is processed.</p>
+            <div class="admin-form wizard-fields"><label>Payment method<select asp-for="Input.PaymentMethod"><option>Cash</option><option>GCash</option><option>Card</option></select></label><label class="checkbox-row"><input asp-for="Input.Insurance" /> Add insurance · ₱500 flat</label></div>
+        </section>
+        <section class="wizard-step" data-step="4" hidden><h2>5. Confirm booking</h2><p class="muted">Review the summary, then create the rental transaction.</p><div class="final-review"><div><span>Vehicle</span><strong data-review-car>—</strong></div><div><span>Customer</span><strong data-review-customer>—</strong></div><div><span>Dates</span><strong data-review-dates>—</strong></div><div><span>Days</span><strong data-review-days>—</strong></div><div><span>Total</span><strong data-review-total>—</strong></div></div></section>
+        <div class="wizard-actions"><button class="button button-ghost" type="button" data-prev hidden>← Back</button><button class="button button-orange" type="button" data-next disabled="@(Model.Vehicles.Count == 0)">Next →</button><button class="button button-orange" type="submit" data-submit hidden>Confirm booking →</button></div>
+    </form>
+    <aside class="admin-panel booking-side-summary"><h2>Booking summary</h2><div class="detail-vehicle"><span class="detail-vehicle-image photo-1" data-summary-photo></span><div><strong data-summary-car>Choose a vehicle</strong><small data-summary-category>Available cars only</small></div></div><div class="detail-line"><span>Rental days</span><strong data-admin-days>1</strong></div><div class="detail-line"><span>Daily rate</span><strong data-admin-rate>₱0</strong></div><div class="detail-line"><span>Rental</span><strong data-admin-base>₱0</strong></div><div class="detail-line"><span>Insurance</span><strong data-admin-insurance>₱0</strong></div><div class="detail-line detail-total"><span>Total amount</span><strong data-admin-total>₱0</strong></div><p class="muted">The server checks availability and calculates the total again when you confirm.</p></aside>
+</div>

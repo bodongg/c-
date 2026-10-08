@@ -1,0 +1,22 @@
+@page
+@model AUTODOK.Pages.Admin.CustomersModel
+@{ ViewData["Title"] = "Customers"; }
+<div class="admin-page-heading"><div><h1>Customers</h1><p>Keep driver details ready for the next rental.</p></div><span class="heading-count">@Model.People.Count shown</span></div>
+@if (TempData["Success"] is string success) { <div class="notice success" role="status">@success</div> }
+@if (TempData["Error"] is string error) { <div class="notice error" role="alert">@error</div> }
+<details class="admin-panel add-panel"><summary>+ Add a customer</summary><form method="post" asp-page-handler="Add" class="admin-form">
+    <label>Full name<input name="fullName" required /></label><label>Phone<input name="phone" required /></label><label>License number<input name="licenseNumber" required /></label><button class="button button-orange" type="submit">Add customer</button>
+</form></details>
+<form method="get" class="admin-search"><label class="sr-only" for="customer-search">Search customers</label><input id="customer-search" name="Search" value="@Model.Search" placeholder="Search name or phone" /><button class="button button-ghost" type="submit">Search</button><a asp-page="/Admin/Customers" class="text-link">Clear</a></form>
+<div class="admin-list">
+@foreach (Customer customer in Model.People)
+{
+    <article class="admin-list-card customer-row"><div class="customer-avatar" aria-hidden="true">@(customer.FullName[0])</div><div class="admin-list-main"><div><h2>@customer.FullName</h2><p>@customer.Phone · License @customer.LicenseNumber</p></div></div>
+        <details class="edit-details"><summary>Edit</summary><form method="post" asp-page-handler="Update" class="admin-form"><input type="hidden" name="id" value="@customer.CustomerID" />
+            <label>Full name<input name="fullName" value="@customer.FullName" required /></label><label>Phone<input name="phone" value="@customer.Phone" required /></label><label>License number<input name="licenseNumber" value="@customer.LicenseNumber" required /></label><button class="button button-orange" type="submit">Save changes</button>
+        </form></details>
+        <form method="post" asp-page-handler="Delete" class="delete-form" data-confirm="Delete @customer.FullName? Customers with rental history cannot be deleted."><input type="hidden" name="id" value="@customer.CustomerID" /><button type="submit">Delete</button></form>
+    </article>
+}
+@if (Model.People.Count == 0) { <div class="empty-state"><h2>No customers found</h2><p>Clear the search or add a customer.</p></div> }
+</div>

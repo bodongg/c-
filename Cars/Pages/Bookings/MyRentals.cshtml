@@ -1,0 +1,25 @@
+@page
+@model AUTODOK.Pages.Bookings.MyRentalsModel
+@{
+    ViewData["Title"] = "My rentals";
+}
+<section class="shell rentals-page">
+    <div class="page-heading"><div><h1>MY <span>RENTALS</span></h1><p>Enter the phone number used when booking.</p></div></div>
+    <form method="get" class="phone-search"><label class="sr-only" for="phone">Phone number</label><input id="phone" name="Phone" value="@Model.Phone" placeholder="e.g. 09171234567" required /><button class="button button-orange" type="submit">Find rentals</button></form>
+    @if (Model.Searched && Model.Items.Count == 0)
+    {
+        <div class="empty-state"><h2>No rentals found</h2><p>Check the phone number or book a car first.</p><a class="button button-orange" asp-page="/Index">Explore cars</a></div>
+    }
+    else if (Model.Items.Count > 0)
+    {
+        <div class="rental-list">
+            @foreach (var item in Model.Items)
+            {
+                <article class="rental-item">
+                    <div><span class="rental-reference">AD-@item.Rental.RentalID.ToString("D6")</span><h2>@item.CarName</h2><p>@item.Rental.PickupDate.ToString("MMM d, yyyy") → @item.Rental.PlannedReturnDate.ToString("MMM d, yyyy")</p></div>
+                    <div class="rental-item-right"><span class="availability @(item.Rental.Status == "Active" ? "is-available" : "is-rented")">@item.Rental.Status</span><strong>₱@item.Rental.TotalAmount.ToString("N0")</strong><a class="text-link" asp-page="/Bookings/Confirmation" asp-route-id="@item.Rental.RentalID">View details →</a></div>
+                </article>
+            }
+        </div>
+    }
+</section>

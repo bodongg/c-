@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#171615" />
+    <title>@ViewData["Title"] · AUTODOK Admin</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+</head>
+<body class="admin-body">
+    <div class="admin-shell">
+        <aside class="admin-sidebar">
+            <a class="brand admin-brand" asp-page="/Admin/Index" aria-label="AUTODOK admin dashboard"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 11 7 5h10l2 6M4 11h16v7H4zM6 18v2m12-2v2M7 14h1m8 0h1" /></svg><span>AUTO<span class="accent-text">DOK</span><small>Car Rental Admin</small></span></a>
+            <nav class="admin-nav" aria-label="Admin navigation">
+                <a class="@(Context.Request.Path.Value == "/Admin" || Context.Request.Path.Value == "/Admin/Index" ? "active" : "")" asp-page="/Admin/Index"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8v10H3zM9 21v-7h6v7" /></svg>Dashboard</a>
+                <a class="@(Context.Request.Path.StartsWithSegments("/Admin/Bookings") ? "active" : "")" asp-page="/Admin/Bookings"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18" /></svg>Bookings</a>
+                <a class="@(Context.Request.Path.StartsWithSegments("/Admin/Cars") ? "active" : "")" asp-page="/Admin/Cars"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 11 7 5h10l2 6M4 11h16v7H4zM6 18v2m12-2v2M7 14h1m8 0h1" /></svg>Vehicles</a>
+                <a class="@(Context.Request.Path.StartsWithSegments("/Admin/Customers") ? "active" : "")" asp-page="/Admin/Customers"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-5 3-8 8-8s8 3 8 8" /></svg>Customers</a>
+                <a class="@(Context.Request.Path.StartsWithSegments("/Admin/Reservations") ? "active" : "")" asp-page="/Admin/Reservations"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" /></svg>Reservations</a>
+                <a class="@(Context.Request.Path.StartsWithSegments("/Admin/Payments") ? "active" : "")" asp-page="/Admin/Payments"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20m-16 5h5" /></svg>Payments</a>
+            </nav>
+            <div class="admin-sidebar-bottom"><a asp-page="/Index">View customer site →</a><form method="post" asp-page="/Admin/Logout"><button type="submit" class="logout-button">Log out</button></form></div>
+        </aside>
+        <div class="admin-main">
+            <header class="admin-topbar"><form method="get" asp-page="/Admin/Reservations" class="topbar-search"><label class="sr-only" for="global-search">Search reservations</label><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5" /></svg><input id="global-search" name="Search" placeholder="Search reservations by customer or vehicle..." /></form><a asp-page="/Admin/Reservations" asp-route-status="Active" class="topbar-alert" aria-label="View active reservations"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" /></svg><span class="alert-dot"></span></a><span class="admin-user"><span class="admin-avatar">A</span><span>Admin<small>Administrator</small></span></span></header>
+            <main class="admin-content">@RenderBody()</main>
+        </div>
+    </div>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

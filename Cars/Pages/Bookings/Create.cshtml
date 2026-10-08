@@ -1,0 +1,52 @@
+@page
+@model AUTODOK.Pages.Bookings.CreateModel
+@{
+    ViewData["Title"] = "Book " + Model.Car.DisplayName;
+}
+<section class="shell booking-page">
+    <a class="back-link" asp-page="/Cars/Details" asp-route-id="@Model.Car.CarID">← Back to @Model.Car.DisplayName</a>
+    <div class="booking-grid">
+        <div>
+            <h1>Book your drive</h1>
+            <p class="muted">Complete your details and review the total before confirming.</p>
+            <form method="post" class="form-panel booking-form" data-booking-form data-price="@Model.Car.PricePerDay.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                <div asp-validation-summary="ModelOnly" class="validation" role="alert"></div>
+                <input type="hidden" asp-for="Input.CarId" />
+                <div class="form-section-heading">Your details</div>
+                <div class="form-two">
+                    <label>Full name<input asp-for="Input.FullName" required autocomplete="name" /></label>
+                    <label>Phone number<input asp-for="Input.Phone" required autocomplete="tel" /></label>
+                </div>
+                <label>Driver's license number<input asp-for="Input.LicenseNumber" required /></label>
+                <div class="form-section-heading">Rental period</div>
+                <div class="form-two">
+                    <label>Pickup date<input asp-for="Input.PickupDate" type="date" asp-format="{0:yyyy-MM-dd}" required /></label>
+                    <label>Return date<input asp-for="Input.ReturnDate" type="date" asp-format="{0:yyyy-MM-dd}" required /></label>
+                </div>
+                <div class="form-two location-fields">
+                    <label>Pickup location<select asp-for="Input.PickupLocation"><option>Davao City</option><option>Tagum City</option><option>Panabo City</option></select></label>
+                    <label>Return location<select asp-for="Input.ReturnLocation"><option>Davao City</option><option>Tagum City</option><option>Panabo City</option></select></label>
+                </div>
+                <label class="checkbox-row"><input asp-for="Input.Insurance" /> Add optional insurance <span>₱500 flat</span></label>
+                <div class="form-section-heading">Payment choice</div>
+                <label>Choose how you plan to pay
+                    <select asp-for="Input.PaymentMethod"><option>Cash</option><option>GCash</option><option>Card</option></select>
+                </label>
+                <p class="fine-print">Demo only: no payment is charged or processed.</p>
+                <button class="button button-orange button-wide" type="submit" disabled="@(Model.Car.Status != "Available")">Confirm rental <span aria-hidden="true">→</span></button>
+            </form>
+        </div>
+        <aside class="checkout-summary">
+            <div class="summary-photo photo-@Model.Car.ImageSlot"></div>
+            <div class="summary-content">
+                <h2>@Model.Car.DisplayName</h2>
+                <p class="muted">@Model.Car.Category · @Model.Car.Transmission · @Model.Car.Seats seats</p>
+                <div class="summary-row"><span>Price per day</span><strong>₱@Model.Car.PricePerDay.ToString("N0")</strong></div>
+                <div class="summary-row"><span>Rental days</span><strong data-days>1</strong></div>
+                <div class="summary-row"><span>Rental</span><strong data-base>₱@Model.Car.PricePerDay.ToString("N0")</strong></div>
+                <div class="summary-row"><span>Insurance</span><strong data-insurance>₱0</strong></div>
+                <div class="summary-row summary-total"><span>Total</span><strong data-total>₱@Model.Car.PricePerDay.ToString("N0")</strong></div>
+            </div>
+        </aside>
+    </div>
+</section>

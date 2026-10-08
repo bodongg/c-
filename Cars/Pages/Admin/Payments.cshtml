@@ -1,0 +1,32 @@
+@page
+@model AUTODOK.Pages.Admin.PaymentsModel
+@{ ViewData["Title"] = "Payments"; }
+<div class="admin-page-heading"><div><h1>Payments</h1><p>Track and record customer payment choices.</p></div><a asp-page="/Admin/Payments" asp-route-status="Pending" class="button button-orange">Record a payment →</a></div>
+@if (TempData["Success"] is string success) { <div class="notice success" role="status">@success</div> }
+@if (TempData["Error"] is string error) { <div class="notice error" role="alert">@error</div> }
+<div class="stats-grid payment-stats"><article class="stat-tile"><span>TOTAL COLLECTED</span><strong>₱@Model.Collected.ToString("N0")</strong><small>Paid demo records</small></article><article class="stat-tile"><span>COMPLETED PAYMENTS</span><strong>@Model.PaidCount</strong><small>Marked paid</small></article><article class="stat-tile"><span>PENDING PAYMENTS</span><strong>@Model.PendingCount</strong><small>Awaiting payment</small></article><article class="stat-tile"><span>REFUNDS</span><strong>@Model.RefundCount</strong><small>Marked refunded</small></article></div>
+<form method="get" class="admin-search filter-bar"><label class="sr-only" for="payment-search">Search payments</label><input id="payment-search" name="Search" value="@Model.Search" placeholder="Customer, booking ID, or payment ID" /><label>Status<select name="Status"><option selected="@(Model.Status == "All")">All</option><option selected="@(Model.Status == "Paid")">Paid</option><option selected="@(Model.Status == "Pending")">Pending</option><option selected="@(Model.Status == "Refunded")">Refunded</option><option selected="@(Model.Status == "Cancelled")">Cancelled</option></select></label><label>Method<select name="Method"><option selected="@(Model.Method == "All")">All</option><option selected="@(Model.Method == "Cash")">Cash</option><option selected="@(Model.Method == "GCash")">GCash</option><option selected="@(Model.Method == "Card")">Card</option></select></label><button class="button button-ghost" type="submit">Filter</button></form>
+<div class="admin-split">
+    <section class="admin-panel table-panel"><h2>Payment records</h2><div class="table-scroll"><table class="data-table"><thead><tr><th>Transaction</th><th>Booking</th><th>Customer</th><th>Amount</th><th>Method</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody>
+    @foreach (var row in Model.Rows)
+    {
+        <tr class="@(Model.Selected?.Payment.PaymentID == row.Payment.PaymentID ? "selected-row" : "")"><td>TXN-@row.Payment.PaymentID.ToString("D5")</td><td>AD-@row.Rental.RentalID.ToString("D6")</td><td>@row.Customer</td><td>₱@row.Payment.Amount.ToString("N0")</td><td>@row.Payment.Method</td><td><span class="status-chip status-@row.Payment.Status.ToLowerInvariant()">@row.Payment.Status</span></td><td>@(row.Payment.PaidDate?.ToString("MMM d, yyyy") ?? "—")</td><td><a class="table-link" asp-page="/Admin/Payments" asp-route-selectedId="@row.Payment.PaymentID">Details</a></td></tr>
+    }
+    </tbody></table></div>@if (Model.Rows.Count == 0) { <div class="empty-state"><h3>No payments found</h3><p>Try another filter or create a booking.</p></div> }</section>
+    <aside class="admin-panel detail-panel"><h2>Payment details</h2>@if (Model.Selected is { } selected)
+    {
+        <div class="detail-line"><span>Transaction ID</span><strong>TXN-@selected.Payment.PaymentID.ToString("D5")</strong></div>
+        <div class="detail-line"><span>Booking ID</span><strong>AD-@selected.Rental.RentalID.ToString("D6")</strong></div>
+        <div class="detail-line"><span>Customer</span><strong>@selected.Customer</strong></div>
+        <div class="detail-line"><span>Vehicle</span><strong>@selected.Car</strong></div>
+        <div class="detail-line"><span>Method</span><strong>@selected.Payment.Method</strong></div>
+        <div class="detail-line"><span>Status</span><strong>@selected.Payment.Status</strong></div>
+        <div class="detail-line"><span>Rental fee</span><strong>₱@selected.Rental.BaseAmount.ToString("N0")</strong></div>
+        <div class="detail-line"><span>Insurance</span><strong>₱@selected.Rental.InsuranceFee.ToString("N0")</strong></div>
+        <div class="detail-line detail-total"><span>Total</span><strong>₱@selected.Payment.Amount.ToString("N0")</strong></div>
+        @if (selected.Payment.Status == "Pending") { <form method="post" asp-page-handler="Record"><input type="hidden" name="id" value="@selected.Payment.PaymentID" /><button class="button button-orange button-wide" type="submit">Mark as paid</button></form> }
+        @if (selected.Payment.Status == "Paid") { <form method="post" asp-page-handler="Refund" data-confirm="Mark this payment refunded? This records a demo status only."><input type="hidden" name="id" value="@selected.Payment.PaymentID" /><button class="button button-ghost button-wide" type="submit">Mark refunded</button></form> }
+        <a class="button button-ghost button-wide" asp-page="/Admin/Receipt" asp-route-id="@selected.Payment.PaymentID">Print / save receipt</a>
+    }
+    else { <p class="muted">Select a payment to see details.</p> }</aside>
+</div>

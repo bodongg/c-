@@ -1,0 +1,63 @@
+@page
+@model AUTODOK.Pages.IndexModel
+@{
+    ViewData["Title"] = "Car rental services";
+}
+<section class="catalog shell">
+    <div class="page-heading">
+        <div>
+            <h1>CAR RENTAL <span>SERVICES</span></h1>
+            <p>Find a ride for your next city trip, family journey, or weekend escape.</p>
+        </div>
+        <span class="heading-count">@Model.Vehicles.Count vehicle@(Model.Vehicles.Count == 1 ? "" : "s")</span>
+    </div>
+    <form method="get" class="catalog-filters" role="search">
+        <label class="sr-only" for="search">Search cars</label>
+        <input id="search" name="Search" value="@Model.Search" placeholder="Search brand or model" />
+        <label class="sr-only" for="category">Category</label>
+        <select id="category" name="Category">
+            <option value="">All categories</option>
+            @foreach (string category in Model.Categories)
+            {
+                <option value="@category" selected="@(Model.Category == category)">@category</option>
+            }
+        </select>
+        <button class="button button-orange" type="submit">Find a car <span aria-hidden="true">→</span></button>
+        <details class="advanced-filters"><summary>More filters</summary><div class="advanced-filter-grid">
+            <label>Maximum price / day<input type="number" name="MaxPrice" min="1" step="0.01" value="@Model.MaxPrice" placeholder="Any price" /></label>
+            <label>Transmission<select name="Transmission"><option value="">Any</option><option value="Automatic" selected="@(Model.Transmission == "Automatic")">Automatic</option><option value="Manual" selected="@(Model.Transmission == "Manual")">Manual</option></select></label>
+            <label>Minimum seats<input type="number" name="MinimumSeats" min="2" max="15" value="@Model.MinimumSeats" placeholder="Any" /></label>
+            <label class="checkbox-row"><input type="checkbox" name="AvailableOnly" value="true" checked="@Model.AvailableOnly" /> Available only</label>
+        </div></details>
+        @if (!string.IsNullOrWhiteSpace(Model.Search) || !string.IsNullOrWhiteSpace(Model.Category) || Model.MaxPrice.HasValue || !string.IsNullOrWhiteSpace(Model.Transmission) || Model.MinimumSeats.HasValue || Model.AvailableOnly)
+        {
+            <a class="text-link" asp-page="/Index">Clear filters</a>
+        }
+    </form>
+
+    @if (Model.Vehicles.Count == 0)
+    {
+        <div class="empty-state"><h2>No cars found</h2><p>Try another model or category.</p><a asp-page="/Index" class="button button-orange">Show all cars</a></div>
+    }
+    else
+    {
+        <div class="vehicle-grid">
+            @foreach (Car car in Model.Vehicles)
+            {
+                <article class="vehicle-card">
+                    <a asp-page="/Cars/Details" asp-route-id="@car.CarID" class="vehicle-photo photo-@car.ImageSlot" aria-label="View @car.DisplayName details">
+                        <span class="availability @(car.Status == "Available" ? "is-available" : car.Status == "Maintenance" ? "is-maintenance" : "is-rented")">@car.Status</span>
+                    </a>
+                    <div class="vehicle-body">
+                        <h2>@car.DisplayName</h2>
+                        <p class="vehicle-description">@car.Description</p>
+                        <div class="vehicle-bottom">
+                            <div class="price"><strong>₱@car.PricePerDay.ToString("N0")</strong><span>/ Day</span></div>
+                            <a class="details-link" asp-page="/Cars/Details" asp-route-id="@car.CarID">View Details <span aria-hidden="true">→</span></a>
+                        </div>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</section>

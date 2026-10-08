@@ -1,0 +1,36 @@
+@page
+@model AUTODOK.Pages.Admin.ReservationsModel
+@{ ViewData["Title"] = "Reservations"; }
+<div class="admin-page-heading"><div><h1>Reservations</h1><p>Manage all car rental reservations.</p></div><a class="button button-orange" asp-page="/Admin/Bookings">+ New reservation</a></div>
+@if (TempData["Success"] is string success) { <div class="notice success" role="status">@success</div> }
+@if (TempData["Error"] is string error) { <div class="notice error" role="alert">@error</div> }
+<form method="get" class="admin-search filter-bar"><label>Search<input name="Search" value="@Model.Search" placeholder="Customer, booking ID, or vehicle" /></label><label>Status<select name="Status"><option selected="@(Model.Status == "All")">All</option><option selected="@(Model.Status == "Active")">Active</option><option selected="@(Model.Status == "Completed")">Completed</option><option selected="@(Model.Status == "Cancelled")">Cancelled</option></select></label><label>Vehicle type<select name="Category"><option selected="@(Model.Category == "All")">All</option>@foreach (string category in Model.Categories) { <option selected="@(Model.Category == category)">@category</option> }</select></label><button class="button button-ghost" type="submit">Apply filters</button></form>
+<div class="admin-split reservations-split">
+    <section class="admin-panel table-panel"><h2>Reservations</h2><div class="table-scroll"><table class="data-table"><thead><tr><th>Booking ID</th><th>Customer</th><th>Vehicle</th><th>Pickup</th><th>Return</th><th>Status</th><th>Total</th><th></th></tr></thead><tbody>
+    @foreach (var row in Model.Rows)
+    {
+        <tr class="@(Model.Selected?.Rental.RentalID == row.Rental.RentalID ? "selected-row" : "")"><td>AD-@row.Rental.RentalID.ToString("D6")</td><td>@row.Customer.FullName</td><td><div class="table-vehicle"><span class="table-thumb photo-@row.Car.ImageSlot"></span><span>@row.Car.DisplayName</span></div></td><td>@row.Rental.PickupDate.ToString("MMM d, yyyy")</td><td>@row.Rental.PlannedReturnDate.ToString("MMM d, yyyy")</td><td><span class="status-chip status-@row.Rental.Status.ToLowerInvariant()">@row.Rental.Status</span></td><td>₱@row.Rental.TotalAmount.ToString("N0")</td><td><a class="table-link" asp-page="/Admin/Reservations" asp-route-selectedId="@row.Rental.RentalID">Details</a></td></tr>
+    }
+    </tbody></table></div>@if (Model.Rows.Count == 0) { <div class="empty-state"><h3>No reservations found</h3><p>Change the filters or create a booking.</p></div> }</section>
+    <aside class="admin-panel detail-panel"><h2>Reservation details</h2>@if (Model.Selected is { } selected)
+    {
+        <div class="detail-vehicle"><span class="detail-vehicle-image photo-@selected.Car.ImageSlot"></span><div><strong>@selected.Car.DisplayName</strong><small>@selected.Car.Category · @selected.Car.Seats seats · @selected.Car.Transmission</small></div></div>
+        <div class="detail-line"><span>Booking ID</span><strong>AD-@selected.Rental.RentalID.ToString("D6")</strong></div>
+        <div class="detail-line"><span>Status</span><strong>@selected.Rental.Status</strong></div>
+        <div class="detail-line"><span>Customer</span><strong>@selected.Customer.FullName</strong></div>
+        <div class="detail-line"><span>Phone</span><strong>@selected.Customer.Phone</strong></div>
+        <div class="detail-line"><span>Pickup</span><strong>@selected.Rental.PickupDate.ToString("MMM d, yyyy") · @selected.Rental.PickupLocation</strong></div>
+        <div class="detail-line"><span>Return</span><strong>@selected.Rental.PlannedReturnDate.ToString("MMM d, yyyy") · @selected.Rental.ReturnLocation</strong></div>
+        <div class="detail-line"><span>Daily rate</span><strong>₱@selected.Car.PricePerDay.ToString("N0")</strong></div>
+        <div class="detail-line"><span>Rental days</span><strong>@selected.Rental.NumberOfDays</strong></div>
+        <div class="detail-line"><span>Insurance</span><strong>₱@selected.Rental.InsuranceFee.ToString("N0")</strong></div>
+        <div class="detail-line detail-total"><span>Total amount</span><strong>₱@selected.Rental.TotalAmount.ToString("N0")</strong></div>
+        @if (selected.Rental.Status == "Active")
+        {
+            <form method="post" asp-page-handler="Return" data-confirm="Return @selected.Car.DisplayName now?"><input type="hidden" name="id" value="@selected.Rental.RentalID" /><button type="submit" class="button button-orange button-wide">Return car</button></form>
+            <form method="post" asp-page-handler="Cancel" data-confirm="Cancel this reservation? The car will become available."><input type="hidden" name="id" value="@selected.Rental.RentalID" /><button type="submit" class="button button-danger button-wide">Cancel reservation</button></form>
+        }
+        <a class="button button-ghost button-wide" asp-page="/Bookings/Confirmation" asp-route-id="@selected.Rental.RentalID">View confirmation</a>
+    }
+    else { <p class="muted">Select a reservation to see details.</p> }</aside>
+</div>

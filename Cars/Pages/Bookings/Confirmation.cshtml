@@ -1,0 +1,23 @@
+@page "{id:int}"
+@model AUTODOK.Pages.Bookings.ConfirmationModel
+@{
+    ViewData["Title"] = "Booking confirmed";
+}
+<section class="shell confirmation-page">
+    <div class="confirmation-card">
+        <div class="success-mark" aria-hidden="true">✓</div>
+        <h1>Booking confirmed</h1>
+        <p class="muted">Your drive is reserved for the selected dates.</p>
+        <div class="booking-reference">AD-@Model.Rental.RentalID.ToString("D6")</div>
+        <div class="confirmation-lines">
+            <div><span>Vehicle</span><strong>@Model.Car.DisplayName</strong></div>
+            <div><span>Driver</span><strong>@Model.Customer.FullName</strong></div>
+            <div><span>Dates</span><strong>@Model.Rental.PickupDate.ToString("MMM d, yyyy") – @Model.Rental.PlannedReturnDate.ToString("MMM d, yyyy")</strong></div>
+            <div><span>Pickup</span><strong>@Model.Rental.PickupLocation</strong></div>
+            <div><span>Return</span><strong>@Model.Rental.ReturnLocation</strong></div>
+            <div><span>Payment choice</span><strong>@Model.Rental.PaymentMethod</strong></div>
+            <div><span>Total</span><strong>₱@Model.Rental.TotalAmount.ToString("N0")</strong></div>
+        </div>
+        <div class="confirmation-actions"><a class="button button-orange" asp-page="/Bookings/MyRentals" asp-route-phone="@Model.Customer.Phone">View my rentals</a><a class="button button-ghost" asp-page="/Index">Explore more cars</a></div>
+    </div>
+</section>
