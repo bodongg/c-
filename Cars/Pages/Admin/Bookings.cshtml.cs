@@ -26,7 +26,7 @@ public class BookingsModel : PageModel
             Rental rental = DataStore.BookCar(Input.CarId, Input.FullName, Input.Phone, Input.LicenseNumber,
                 Input.PickupDate, Input.ReturnDate, Input.PickupLocation, Input.ReturnLocation,
                 Input.Insurance, Input.PaymentMethod);
-            TempData["Success"] = $"Booking AD-{rental.RentalID:D6} confirmed. +50 XP";
+            TempData["Success"] = $"Booking AD-{rental.RentalID:D6} confirmed.";
             return RedirectToPage("/Admin/Reservations", new { selectedId = rental.RentalID });
         }
         catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)

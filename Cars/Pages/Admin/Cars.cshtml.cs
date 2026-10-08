@@ -1,5 +1,7 @@
 using AUTODOK.Data;
 using AUTODOK.Models;
+using AUTODOK.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -29,21 +31,34 @@ public class CarsModel : PageModel
         }).ToList();
     }
 
-    public IActionResult OnPostAdd(string brand, string model, string licensePlate, int year, string category, string transmission,
-        int seats, decimal pricePerDay, string? description, int imageSlot)
-        => Change(() => DataStore.AddCar(brand, model, licensePlate, year, category, transmission, seats, pricePerDay, description ?? "", imageSlot), "Vehicle added.");
+    public Task<IActionResult> OnPostAddAsync(string brand, string model, string licensePlate, int year, string category, string transmission,
+        int seats, decimal pricePerDay, string? description, IFormFile? photo)
+        => ChangeAsync(async () =>
+        {
+            string imageDataUrl = (await VehiclePhoto.ReadAsync(photo, required: true))!;
+            DataStore.AddCar(brand, model, licensePlate, year, category, transmission, seats, pricePerDay, description ?? "", imageDataUrl);
+        }, "Vehicle added.");
 
-    public IActionResult OnPostUpdate(int id, string brand, string model, string licensePlate, int year, string category, string transmission,
-        int seats, decimal pricePerDay, string? description, int imageSlot)
-        => Change(() => DataStore.UpdateCar(id, brand, model, licensePlate, year, category, transmission, seats, pricePerDay, description ?? "", imageSlot), "Vehicle updated.");
+    public Task<IActionResult> OnPostUpdateAsync(int id, string brand, string model, string licensePlate, int year, string category, string transmission,
+        int seats, decimal pricePerDay, string? description, IFormFile? photo)
+        => ChangeAsync(async () =>
+        {
+            string? imageDataUrl = await VehiclePhoto.ReadAsync(photo, required: false);
+            DataStore.UpdateCar(id, brand, model, licensePlate, year, category, transmission, seats, pricePerDay, description ?? "", imageDataUrl);
+        }, "Vehicle updated.");
 
     public IActionResult OnPostDelete(int id) => Change(() => DataStore.DeleteCar(id), "Vehicle deleted.");
-    public IActionResult OnPostMaintenance(int id, bool maintenance)
-        => Change(() => DataStore.SetMaintenance(id, maintenance), maintenance ? "Car marked for maintenance." : "Car available again.");
 
     private IActionResult Change(Action action, string success)
     {
         try { action(); TempData["Success"] = success; }
+        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException) { TempData["Error"] = ex.Message; }
+        return RedirectToPage();
+    }
+
+    private async Task<IActionResult> ChangeAsync(Func<Task> action, string success)
+    {
+        try { await action(); TempData["Success"] = success; }
         catch (Exception ex) when (ex is ArgumentException or InvalidOperationException) { TempData["Error"] = ex.Message; }
         return RedirectToPage();
     }

@@ -26,14 +26,15 @@ Three students need a presentation-ready project with about five hours to prepar
 
 - No SQL, database, ORM, API, or internet requirement. Data stays in C# `List<T>` collections for the current application run.
 - Customer catalog, details, booking, confirmation, and a rental lookup by phone.
-- Admin login; car and customer CRUD; bookings; reservations with return and cancellation; in-memory payment records; statistics, XP, levels, and missions.
+- Admin login; car and customer CRUD; bookings; reservations with return and cancellation; in-memory payment records; and dashboard statistics.
+- Vehicle add/edit forms accept an uploaded PNG, JPEG, or WebP photo up to 2 MB. Photos are stored with the in-memory car records.
 - Payment method is a recorded demo choice. No payment processing is performed.
 - Hardcoded classroom admin credentials are `admin` / `admin123`.
 - Vehicle names and illustrative Philippine peso prices follow the supplied screenshot.
 
 ## Brand Commitments
 
-The user supplied a screenshot of a dark automotive catalog with orange accents, four columns of car photo cards on desktop, short descriptions, peso-per-day prices, and orange View Details buttons. The project is named AUTODOK.
+The user supplied a screenshot of a dark automotive catalog with orange accents, four columns of car photo cards on desktop, short descriptions, peso-per-day prices, and orange View Details buttons. The project is named AUTODOK and uses the supplied AUTODOK logo.
 
 ## Evidence on Hand
 

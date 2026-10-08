@@ -14,6 +14,9 @@ public class Car
     public string Description { get; set; } = "";
     public string Status { get; set; } = "Available";
     public int ImageSlot { get; set; } = 1;
-    public bool IsSample { get; set; }
+    public string? ImageDataUrl { get; set; }
     public string DisplayName => $"{Brand} {Model}";
+    public string PhotoStyle => string.IsNullOrEmpty(ImageDataUrl)
+        ? ""
+        : $"background-image:url({ImageDataUrl});background-size:cover;background-position:center";
 }

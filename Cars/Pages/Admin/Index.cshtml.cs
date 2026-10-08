@@ -13,15 +13,6 @@ public class IndexModel : PageModel
     public int TotalBookings => DataStore.TotalRentalCount;
     public int Customers => DataStore.CustomerCount;
     public decimal Revenue => DataStore.CompletedRevenue;
-    public int XP => DataStore.XP;
-    public int Level => DataStore.Level;
-    public int Progress => Level == 5 ? 100 : Math.Clamp((XP - DataStore.LevelStart) * 100 / (DataStore.LevelEnd - DataStore.LevelStart), 0, 100);
-    public int AddedCars => DataStore.AddedCarCount;
-    public int AddedCustomers => DataStore.AddedCustomerCount;
-    public int RentalCount => DataStore.RentalList().Count(r => !r.IsSample);
-    public bool RentalMission => DataStore.MissionClaimed("rental");
-    public bool FleetMission => DataStore.MissionClaimed("fleet");
-    public bool CustomerMission => DataStore.MissionClaimed("customer");
     public List<BookingRow> RecentBookings { get; private set; } = new();
     public List<BookingRow> UpcomingReturns { get; private set; } = new();
     public List<VehicleType> VehicleTypes { get; private set; } = new();
@@ -37,7 +28,8 @@ public class IndexModel : PageModel
         List<BookingRow> rows = rentals.Select(r => new BookingRow(r,
             people.FirstOrDefault(c => c.CustomerID == r.CustomerID)?.FullName ?? "Unknown",
             cars.FirstOrDefault(c => c.CarID == r.CarID)?.DisplayName ?? "Vehicle",
-            cars.FirstOrDefault(c => c.CarID == r.CarID)?.ImageSlot ?? 1)).ToList();
+            cars.FirstOrDefault(c => c.CarID == r.CarID)?.ImageSlot ?? 1,
+            cars.FirstOrDefault(c => c.CarID == r.CarID)?.PhotoStyle ?? "")).ToList();
         RecentBookings = rows.OrderByDescending(x => x.Rental.RentalID).Take(5).ToList();
         UpcomingReturns = rows.Where(x => x.Rental.Status == "Active").OrderBy(x => x.Rental.PlannedReturnDate).Take(3).ToList();
 
@@ -61,6 +53,6 @@ public class IndexModel : PageModel
         DonutStyle = pieces.Count == 0 ? "background:#453c36" : $"background:conic-gradient({string.Join(",", pieces)})";
     }
 
-    public record BookingRow(Rental Rental, string Customer, string Car, int ImageSlot);
+    public record BookingRow(Rental Rental, string Customer, string Car, int ImageSlot, string PhotoStyle);
     public record VehicleType(string Name, int Count, decimal Percent, string Color);
 }

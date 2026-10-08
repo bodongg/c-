@@ -45,8 +45,8 @@
             @foreach (Car car in Model.Vehicles)
             {
                 <article class="vehicle-card">
-                    <a asp-page="/Cars/Details" asp-route-id="@car.CarID" class="vehicle-photo photo-@car.ImageSlot" aria-label="View @car.DisplayName details">
-                        <span class="availability @(car.Status == "Available" ? "is-available" : car.Status == "Maintenance" ? "is-maintenance" : "is-rented")">@car.Status</span>
+                    <a asp-page="/Cars/Details" asp-route-id="@car.CarID" class="vehicle-photo photo-@car.ImageSlot" style="@car.PhotoStyle" aria-label="View @car.DisplayName details">
+                        <span class="availability @(car.Status == "Available" ? "is-available" : "is-rented")">@car.Status</span>
                     </a>
                     <div class="vehicle-body">
                         <h2>@car.DisplayName</h2>

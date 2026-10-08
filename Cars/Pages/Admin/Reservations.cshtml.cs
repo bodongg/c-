@@ -33,7 +33,7 @@ public class ReservationsModel : PageModel
 
     public IActionResult OnPostReturn(int id)
     {
-        try { DataStore.ReturnCar(id); TempData["Success"] = "Car returned. It is available again. +25 XP"; }
+        try { DataStore.ReturnCar(id); TempData["Success"] = "Car returned. It is available again."; }
         catch (Exception ex) when (ex is ArgumentException or InvalidOperationException) { TempData["Error"] = ex.Message; }
         return RedirectToPage(new { selectedId = id });
     }

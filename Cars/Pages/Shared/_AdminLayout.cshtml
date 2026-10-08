@@ -11,7 +11,7 @@
 <body class="admin-body">
     <div class="admin-shell">
         <aside class="admin-sidebar">
-            <a class="brand admin-brand" asp-page="/Admin/Index" aria-label="AUTODOK admin dashboard"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 11 7 5h10l2 6M4 11h16v7H4zM6 18v2m12-2v2M7 14h1m8 0h1" /></svg><span>AUTO<span class="accent-text">DOK</span><small>Car Rental Admin</small></span></a>
+            <a class="brand admin-brand" asp-page="/Admin/Index" aria-label="AUTODOK admin dashboard"><img class="brand-logo" src="~/images/autodok-logo.png" asp-append-version="true" alt="AUTODOK" /><small>Car Rental Admin</small></a>
             <nav class="admin-nav" aria-label="Admin navigation">
                 <a class="@(Context.Request.Path.Value == "/Admin" || Context.Request.Path.Value == "/Admin/Index" ? "active" : "")" asp-page="/Admin/Index"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8v10H3zM9 21v-7h6v7" /></svg>Dashboard</a>
                 <a class="@(Context.Request.Path.StartsWithSegments("/Admin/Bookings") ? "active" : "")" asp-page="/Admin/Bookings"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18" /></svg>Bookings</a>

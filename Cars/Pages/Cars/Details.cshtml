@@ -6,9 +6,9 @@
 <section class="shell detail-page">
     <a class="back-link" asp-page="/Index">← Back to vehicles</a>
     <div class="detail-grid">
-        <div class="detail-photo photo-@Model.Car.ImageSlot" role="img" aria-label="@Model.Car.DisplayName vehicle photo"></div>
+        <div class="detail-photo photo-@Model.Car.ImageSlot" style="@Model.Car.PhotoStyle" role="img" aria-label="@Model.Car.DisplayName vehicle photo"></div>
         <div class="detail-info">
-            <span class="availability @(Model.Car.Status == "Available" ? "is-available" : Model.Car.Status == "Maintenance" ? "is-maintenance" : "is-rented")">@Model.Car.Status</span>
+            <span class="availability @(Model.Car.Status == "Available" ? "is-available" : "is-rented")">@Model.Car.Status</span>
             <h1>@Model.Car.DisplayName</h1>
             <p class="detail-summary">@Model.Car.Description</p>
             <div class="spec-list">

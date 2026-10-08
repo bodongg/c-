@@ -10,9 +10,7 @@ public static class DataStore
     public static List<Customer> Customers { get; } = new();
     public static List<Rental> Rentals { get; } = new();
     public static List<Payment> Payments { get; } = new();
-    public static int XP { get; private set; }
     private static int nextCarId = 1, nextCustomerId = 1, nextRentalId = 1, nextPaymentId = 1;
-    private static readonly HashSet<string> ClaimedMissions = new();
 
     public static void Seed()
     {
@@ -35,9 +33,9 @@ public static class DataStore
                 "A rugged pickup suited to open roads and outdoor weekends.");
             AddSampleCar("Toyota", "Avanza", "NLP 8642", 2022, "MPV", 7, 2000, 8,
                 "An affordable multi-purpose vehicle for families on the move.");
-            Customers.Add(new Customer { CustomerID = nextCustomerId++, FullName = "Alex Santos", Phone = "09171234567", LicenseNumber = "N01-23-456789", IsSample = true });
-            Customers.Add(new Customer { CustomerID = nextCustomerId++, FullName = "Jamie Cruz", Phone = "09181234567", LicenseNumber = "N02-23-654321", IsSample = true });
-            Customers.Add(new Customer { CustomerID = nextCustomerId++, FullName = "Pat Reyes", Phone = "09191234567", LicenseNumber = "N03-23-123456", IsSample = true });
+            Customers.Add(new Customer { CustomerID = nextCustomerId++, FullName = "Alex Santos", Phone = "09171234567", LicenseNumber = "N01-23-456789" });
+            Customers.Add(new Customer { CustomerID = nextCustomerId++, FullName = "Jamie Cruz", Phone = "09181234567", LicenseNumber = "N02-23-654321" });
+            Customers.Add(new Customer { CustomerID = nextCustomerId++, FullName = "Pat Reyes", Phone = "09191234567", LicenseNumber = "N03-23-123456" });
             AddSampleRental(1, 1, 2, -1, "Active", "Cash", "Pending");
             AddSampleRental(2, 6, 2, -5, "Completed", "GCash", "Paid");
             AddSampleRental(3, 4, 3, -9, "Completed", "Card", "Paid");
@@ -46,7 +44,7 @@ public static class DataStore
 
     private static void AddSampleCar(string brand, string model, string plate, int year, string category, int seats, decimal price, int slot, string description)
         => Cars.Add(new Car { CarID = nextCarId++, Brand = brand, Model = model, LicensePlate = plate, Year = year, Category = category,
-            Seats = seats, PricePerDay = price, ImageSlot = slot, Description = description, IsSample = true });
+            Seats = seats, PricePerDay = price, ImageSlot = slot, Description = description });
 
     private static void AddSampleRental(int customerId, int carId, int days, int startOffset, string status, string method, string paymentStatus)
     {
@@ -55,7 +53,7 @@ public static class DataStore
         Rental rental = new() { RentalID = nextRentalId++, CustomerID = customerId, CarID = carId,
             RentalDate = pickup.AddDays(-1), PickupDate = pickup, PlannedReturnDate = pickup.AddDays(days),
             NumberOfDays = days, BaseAmount = car.PricePerDay * days, TotalAmount = car.PricePerDay * days,
-            PaymentMethod = method, Status = status, IsSample = true,
+            PaymentMethod = method, Status = status,
             ReturnDate = status == "Completed" ? pickup.AddDays(days) : null };
         Rentals.Add(rental);
         if (status == "Active") car.Status = "Rented";
@@ -93,27 +91,29 @@ public static class DataStore
     }
 
     public static Car AddCar(string brand, string model, string licensePlate, int year, string category, string transmission,
-        int seats, decimal price, string description, int imageSlot)
+        int seats, decimal price, string description, string imageDataUrl)
     {
-        ValidateCar(brand, model, licensePlate, year, category, transmission, seats, price, imageSlot);
+        ValidateCar(brand, model, licensePlate, year, category, transmission, seats, price);
+        if (string.IsNullOrWhiteSpace(imageDataUrl) || !imageDataUrl.StartsWith("data:image/", StringComparison.Ordinal))
+            throw new ArgumentException("Upload a vehicle photo.");
         lock (Sync)
         {
             if (Cars.Any(c => c.LicensePlate.Equals(licensePlate.Trim(), StringComparison.OrdinalIgnoreCase)))
                 throw new ArgumentException("This license plate is already in the fleet.");
             Car car = new() { CarID = nextCarId++, Brand = brand.Trim(), Model = model.Trim(), Year = year,
                 LicensePlate = licensePlate.Trim().ToUpperInvariant(), Category = category.Trim(), Transmission = transmission.Trim(), Seats = seats, PricePerDay = price,
-                Description = description.Trim(), ImageSlot = imageSlot };
+                Description = description.Trim(), ImageDataUrl = imageDataUrl };
             Cars.Add(car);
-            XP += 10;
-            CheckMissions();
             return Copy(car);
         }
     }
 
     public static void UpdateCar(int id, string brand, string model, string licensePlate, int year, string category, string transmission,
-        int seats, decimal price, string description, int imageSlot)
+        int seats, decimal price, string description, string? imageDataUrl)
     {
-        ValidateCar(brand, model, licensePlate, year, category, transmission, seats, price, imageSlot);
+        ValidateCar(brand, model, licensePlate, year, category, transmission, seats, price);
+        if (imageDataUrl != null && !imageDataUrl.StartsWith("data:image/", StringComparison.Ordinal))
+            throw new ArgumentException("Upload a valid vehicle photo.");
         lock (Sync)
         {
             Car car = Cars.FirstOrDefault(c => c.CarID == id) ?? throw new ArgumentException("Choose a car to edit.");
@@ -121,7 +121,8 @@ public static class DataStore
                 throw new ArgumentException("Another car already has this license plate.");
             car.Brand = brand.Trim(); car.Model = model.Trim(); car.Year = year; car.Category = category.Trim();
             car.LicensePlate = licensePlate.Trim().ToUpperInvariant(); car.Transmission = transmission.Trim(); car.Seats = seats; car.PricePerDay = price;
-            car.Description = description.Trim(); car.ImageSlot = imageSlot;
+            car.Description = description.Trim();
+            if (imageDataUrl != null) car.ImageDataUrl = imageDataUrl;
         }
     }
 
@@ -136,16 +137,6 @@ public static class DataStore
         }
     }
 
-    public static void SetMaintenance(int id, bool maintenance)
-    {
-        lock (Sync)
-        {
-            Car car = Cars.FirstOrDefault(c => c.CarID == id) ?? throw new ArgumentException("Car not found.");
-            if (car.Status == "Rented") throw new InvalidOperationException("Return this car before changing maintenance status.");
-            car.Status = maintenance ? "Maintenance" : "Available";
-        }
-    }
-
     public static Customer AddCustomer(string name, string phone, string license)
     {
         ValidateCustomer(name, phone, license);
@@ -154,7 +145,7 @@ public static class DataStore
             if (Customers.Any(c => c.Phone.Equals(phone.Trim(), StringComparison.OrdinalIgnoreCase)))
                 throw new ArgumentException("A customer with this phone number already exists.");
             Customer customer = new() { CustomerID = nextCustomerId++, FullName = name.Trim(), Phone = phone.Trim(), LicenseNumber = license.Trim() };
-            Customers.Add(customer); XP += 10; CheckMissions();
+            Customers.Add(customer);
             return Copy(customer);
         }
     }
@@ -200,7 +191,7 @@ public static class DataStore
             if (customer == null)
             {
                 customer = new Customer { CustomerID = nextCustomerId++, FullName = name.Trim(), Phone = phone.Trim(), LicenseNumber = license.Trim() };
-                Customers.Add(customer); XP += 10;
+                Customers.Add(customer);
             }
             else if (!customer.LicenseNumber.Equals(license.Trim(), StringComparison.OrdinalIgnoreCase))
                 throw new ArgumentException("The license number does not match the existing customer with this phone number.");
@@ -214,7 +205,6 @@ public static class DataStore
             Rentals.Add(rental); car.Status = "Rented";
             Payments.Add(new Payment { PaymentID = nextPaymentId++, RentalID = rental.RentalID,
                 Amount = rental.TotalAmount, Method = paymentMethod, Status = "Pending" });
-            XP += 50; CheckMissions();
             return Copy(rental);
         }
     }
@@ -226,7 +216,7 @@ public static class DataStore
             Rental rental = Rentals.FirstOrDefault(r => r.RentalID == rentalId) ?? throw new ArgumentException("Rental not found.");
             if (rental.Status != "Active") throw new InvalidOperationException("This rental has already been returned.");
             Car car = Cars.First(c => c.CarID == rental.CarID);
-            rental.Status = "Completed"; rental.ReturnDate = DateTime.Now; car.Status = "Available"; XP += 25;
+            rental.Status = "Completed"; rental.ReturnDate = DateTime.Now; car.Status = "Available";
         }
     }
 
@@ -265,12 +255,6 @@ public static class DataStore
         }
     }
 
-    public static int Level => XP switch { < 100 => 1, < 250 => 2, < 500 => 3, < 1000 => 4, _ => 5 };
-    public static int LevelStart => Level switch { 1 => 0, 2 => 100, 3 => 250, 4 => 500, _ => 1000 };
-    public static int LevelEnd => Level switch { 1 => 100, 2 => 250, 3 => 500, 4 => 1000, _ => 1000 };
-    public static bool MissionClaimed(string key) { lock (Sync) return ClaimedMissions.Contains(key); }
-    public static int AddedCarCount { get { lock (Sync) return Cars.Count(c => !c.IsSample); } }
-    public static int AddedCustomerCount { get { lock (Sync) return Customers.Count(c => !c.IsSample); } }
     public static int AvailableCount { get { lock (Sync) return Cars.Count(c => c.Status == "Available"); } }
     public static int ActiveRentalCount { get { lock (Sync) return Rentals.Count(r => r.Status == "Active"); } }
     public static int TotalRentalCount { get { lock (Sync) return Rentals.Count; } }
@@ -280,14 +264,7 @@ public static class DataStore
         get { lock (Sync) { decimal total = 0; foreach (Rental r in Rentals) if (r.Status == "Completed") total += r.TotalAmount; return total; } }
     }
 
-    private static void CheckMissions()
-    {
-        if (Rentals.Count(r => !r.IsSample) >= 1 && ClaimedMissions.Add("rental")) XP += 50;
-        if (Cars.Count(c => !c.IsSample) >= 5 && ClaimedMissions.Add("fleet")) XP += 50;
-        if (Customers.Count(c => !c.IsSample) >= 3 && ClaimedMissions.Add("customer")) XP += 50;
-    }
-
-    private static void ValidateCar(string brand, string model, string licensePlate, int year, string category, string transmission, int seats, decimal price, int imageSlot)
+    private static void ValidateCar(string brand, string model, string licensePlate, int year, string category, string transmission, int seats, decimal price)
     {
         if (string.IsNullOrWhiteSpace(brand) || string.IsNullOrWhiteSpace(model) || string.IsNullOrWhiteSpace(category) || string.IsNullOrWhiteSpace(licensePlate))
             throw new ArgumentException("Brand, model, license plate, and category are required.");
@@ -295,7 +272,6 @@ public static class DataStore
         if (transmission is not ("Automatic" or "Manual")) throw new ArgumentException("Choose Automatic or Manual transmission.");
         if (seats < 2 || seats > 15) throw new ArgumentException("Seats must be between 2 and 15.");
         if (price <= 0) throw new ArgumentException("Price per day must be greater than zero.");
-        if (imageSlot < 1 || imageSlot > 8) throw new ArgumentException("Choose a photo from 1 to 8.");
     }
     private static void ValidateCustomer(string name, string phone, string license)
     {
@@ -306,14 +282,14 @@ public static class DataStore
 
     private static Car Copy(Car c) => new() { CarID = c.CarID, Brand = c.Brand, Model = c.Model, LicensePlate = c.LicensePlate, Year = c.Year,
         Category = c.Category, Transmission = c.Transmission, Seats = c.Seats, PricePerDay = c.PricePerDay,
-        Description = c.Description, Status = c.Status, ImageSlot = c.ImageSlot, IsSample = c.IsSample };
+        Description = c.Description, Status = c.Status, ImageSlot = c.ImageSlot, ImageDataUrl = c.ImageDataUrl };
     private static Customer Copy(Customer c) => new() { CustomerID = c.CustomerID, FullName = c.FullName,
-        Phone = c.Phone, LicenseNumber = c.LicenseNumber, IsSample = c.IsSample };
+        Phone = c.Phone, LicenseNumber = c.LicenseNumber };
     private static Rental Copy(Rental r) => new() { RentalID = r.RentalID, CustomerID = r.CustomerID, CarID = r.CarID,
         RentalDate = r.RentalDate, PickupDate = r.PickupDate, PlannedReturnDate = r.PlannedReturnDate,
         PickupLocation = r.PickupLocation, ReturnLocation = r.ReturnLocation,
         ReturnDate = r.ReturnDate, NumberOfDays = r.NumberOfDays, BaseAmount = r.BaseAmount,
-        InsuranceFee = r.InsuranceFee, TotalAmount = r.TotalAmount, PaymentMethod = r.PaymentMethod, Status = r.Status, IsSample = r.IsSample };
+        InsuranceFee = r.InsuranceFee, TotalAmount = r.TotalAmount, PaymentMethod = r.PaymentMethod, Status = r.Status };
     private static Payment Copy(Payment p) => new() { PaymentID = p.PaymentID, RentalID = p.RentalID, Amount = p.Amount,
         Method = p.Method, Status = p.Status, PaidDate = p.PaidDate };
 }

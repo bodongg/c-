@@ -17,5 +17,4 @@ public class Rental
     public decimal TotalAmount { get; set; }
     public string PaymentMethod { get; set; } = "Cash";
     public string Status { get; set; } = "Active";
-    public bool IsSample { get; set; }
 }

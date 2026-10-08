@@ -11,7 +11,7 @@
             <div class="booking-vehicle-list">
             @foreach (Car car in Model.Vehicles)
             {
-                <label class="booking-car-option"><input asp-for="Input.CarId" type="radio" value="@car.CarID" data-price="@car.PricePerDay.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-name="@car.DisplayName" data-category="@car.Category" data-slot="@car.ImageSlot" required /><span class="booking-option-photo photo-@car.ImageSlot"></span><span class="booking-option-info"><strong>@car.DisplayName</strong><small>@car.Category · @car.Seats seats · @car.Transmission</small><em class="availability is-available">Available</em></span><span class="booking-option-price"><strong>₱@car.PricePerDay.ToString("N0")</strong><small>/ day</small></span></label>
+                <label class="booking-car-option"><input asp-for="Input.CarId" type="radio" value="@car.CarID" data-price="@car.PricePerDay.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-name="@car.DisplayName" data-category="@car.Category" data-slot="@car.ImageSlot" required /><span class="booking-option-photo photo-@car.ImageSlot" style="@car.PhotoStyle"></span><span class="booking-option-info"><strong>@car.DisplayName</strong><small>@car.Category · @car.Seats seats · @car.Transmission</small><em class="availability is-available">Available</em></span><span class="booking-option-price"><strong>₱@car.PricePerDay.ToString("N0")</strong><small>/ day</small></span></label>
             }
             @if (Model.Vehicles.Count == 0) { <div class="empty-state"><h3>No cars available</h3><p>Return a rented car or add a new vehicle first.</p></div> }
             </div>

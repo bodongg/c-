@@ -9,12 +9,12 @@
     <section class="admin-panel table-panel"><h2>Reservations</h2><div class="table-scroll"><table class="data-table"><thead><tr><th>Booking ID</th><th>Customer</th><th>Vehicle</th><th>Pickup</th><th>Return</th><th>Status</th><th>Total</th><th></th></tr></thead><tbody>
     @foreach (var row in Model.Rows)
     {
-        <tr class="@(Model.Selected?.Rental.RentalID == row.Rental.RentalID ? "selected-row" : "")"><td>AD-@row.Rental.RentalID.ToString("D6")</td><td>@row.Customer.FullName</td><td><div class="table-vehicle"><span class="table-thumb photo-@row.Car.ImageSlot"></span><span>@row.Car.DisplayName</span></div></td><td>@row.Rental.PickupDate.ToString("MMM d, yyyy")</td><td>@row.Rental.PlannedReturnDate.ToString("MMM d, yyyy")</td><td><span class="status-chip status-@row.Rental.Status.ToLowerInvariant()">@row.Rental.Status</span></td><td>₱@row.Rental.TotalAmount.ToString("N0")</td><td><a class="table-link" asp-page="/Admin/Reservations" asp-route-selectedId="@row.Rental.RentalID">Details</a></td></tr>
+        <tr class="@(Model.Selected?.Rental.RentalID == row.Rental.RentalID ? "selected-row" : "")"><td>AD-@row.Rental.RentalID.ToString("D6")</td><td>@row.Customer.FullName</td><td><div class="table-vehicle"><span class="table-thumb photo-@row.Car.ImageSlot" style="@row.Car.PhotoStyle"></span><span>@row.Car.DisplayName</span></div></td><td>@row.Rental.PickupDate.ToString("MMM d, yyyy")</td><td>@row.Rental.PlannedReturnDate.ToString("MMM d, yyyy")</td><td><span class="status-chip status-@row.Rental.Status.ToLowerInvariant()">@row.Rental.Status</span></td><td>₱@row.Rental.TotalAmount.ToString("N0")</td><td><a class="table-link" asp-page="/Admin/Reservations" asp-route-selectedId="@row.Rental.RentalID">Details</a></td></tr>
     }
     </tbody></table></div>@if (Model.Rows.Count == 0) { <div class="empty-state"><h3>No reservations found</h3><p>Change the filters or create a booking.</p></div> }</section>
     <aside class="admin-panel detail-panel"><h2>Reservation details</h2>@if (Model.Selected is { } selected)
     {
-        <div class="detail-vehicle"><span class="detail-vehicle-image photo-@selected.Car.ImageSlot"></span><div><strong>@selected.Car.DisplayName</strong><small>@selected.Car.Category · @selected.Car.Seats seats · @selected.Car.Transmission</small></div></div>
+        <div class="detail-vehicle"><span class="detail-vehicle-image photo-@selected.Car.ImageSlot" style="@selected.Car.PhotoStyle"></span><div><strong>@selected.Car.DisplayName</strong><small>@selected.Car.Category · @selected.Car.Seats seats · @selected.Car.Transmission</small></div></div>
         <div class="detail-line"><span>Booking ID</span><strong>AD-@selected.Rental.RentalID.ToString("D6")</strong></div>
         <div class="detail-line"><span>Status</span><strong>@selected.Rental.Status</strong></div>
         <div class="detail-line"><span>Customer</span><strong>@selected.Customer.FullName</strong></div>

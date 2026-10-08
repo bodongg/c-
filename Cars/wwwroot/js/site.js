@@ -26,12 +26,49 @@ document.querySelectorAll('[data-edit-car]').forEach(button => {
     if (!dialog) return;
     const fields = { id:'id', brand:'brand', model:'model', licensePlate:'plate', year:'year',
       category:'category', transmission:'transmission', seats:'seats', pricePerDay:'price',
-      description:'description', imageSlot:'slot' };
+      description:'description' };
     for (const [name, key] of Object.entries(fields)) {
       const field = dialog.querySelector(`[name="${name}"]`);
       if (field) field.value = button.dataset[key] || '';
     }
+    const thumb = button.closest('tr')?.querySelector('.vehicle-thumb');
+    const preview = dialog.querySelector('[data-upload-preview]');
+    if (thumb && preview) {
+      const current = getComputedStyle(thumb);
+      preview.style.backgroundImage = current.backgroundImage;
+      preview.style.backgroundSize = current.backgroundSize;
+      preview.style.backgroundPosition = current.backgroundPosition;
+      preview.hidden = false;
+    }
+    dialog.querySelector('[name="photo"]').value = '';
     dialog.showModal();
+  });
+});
+
+document.querySelectorAll('.photo-upload input[type="file"]').forEach(input => {
+  input.addEventListener('change', () => {
+    const file = input.files?.[0];
+    const preview = input.closest('.photo-upload')?.querySelector('[data-upload-preview]');
+    input.setCustomValidity('');
+    if (!file) {
+      if (preview && input.closest('#add-vehicle')) preview.hidden = true;
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      input.setCustomValidity('Choose a photo that is 2 MB or smaller.');
+      input.reportValidity();
+      return;
+    }
+    if (preview) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        preview.style.backgroundImage = `url(${reader.result})`;
+        preview.style.backgroundSize = 'cover';
+        preview.style.backgroundPosition = 'center';
+        preview.hidden = false;
+      };
+      reader.readAsDataURL(file);
+    }
   });
 });
 
@@ -92,7 +129,12 @@ if (adminBooking) {
     const fee = insurance.checked ? 500 : 0;
     document.querySelector('[data-summary-car]').textContent = chosen?.dataset.name || 'Choose a vehicle';
     document.querySelector('[data-summary-category]').textContent = chosen?.dataset.category || 'Available cars only';
-    document.querySelector('[data-summary-photo]').className = `detail-vehicle-image photo-${chosen?.dataset.slot || 1}`;
+    const summaryPhoto = document.querySelector('[data-summary-photo]');
+    const chosenPhoto = chosen?.closest('.booking-car-option')?.querySelector('.booking-option-photo');
+    summaryPhoto.className = `detail-vehicle-image photo-${chosen?.dataset.slot || 1}`;
+    summaryPhoto.style.backgroundImage = chosenPhoto?.style.backgroundImage || '';
+    summaryPhoto.style.backgroundSize = chosenPhoto?.style.backgroundSize || '';
+    summaryPhoto.style.backgroundPosition = chosenPhoto?.style.backgroundPosition || '';
     document.querySelector('[data-admin-days]').textContent = days || '—';
     document.querySelector('[data-admin-rate]').textContent = money(daily);
     document.querySelector('[data-admin-base]').textContent = money(base);

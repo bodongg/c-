@@ -1,16 +1,78 @@
 @page
 @model AUTODOK.Pages.Admin.CarsModel
 @{ ViewData["Title"] = "Vehicles"; }
-<div class="admin-page-heading"><div><h1>Vehicles</h1><p>Manage your fleet of rental vehicles.</p></div><button type="button" class="button button-orange" data-open-dialog="add-vehicle">+ Add vehicle</button></div>
+
+<div class="admin-page-heading">
+    <div><h1>Vehicles</h1><p>Manage your fleet of rental vehicles.</p></div>
+    <button type="button" class="button button-orange" data-open-dialog="add-vehicle">+ Add vehicle</button>
+</div>
 @if (TempData["Success"] is string success) { <div class="notice success" role="status">@success</div> }
 @if (TempData["Error"] is string error) { <div class="notice error" role="alert">@error</div> }
-<form method="get" class="admin-search filter-bar"><label>Search<input name="Search" value="@Model.Search" placeholder="Make, model, or license plate" /></label><label>Vehicle type<select name="Type"><option selected="@(Model.Type == "All")">All</option>@foreach (string type in Model.Categories) { <option selected="@(Model.Type == type)">@type</option> }</select></label><label>Status<select name="Status"><option selected="@(Model.Status == "All")">All</option><option selected="@(Model.Status == "Available")">Available</option><option selected="@(Model.Status == "Rented")">Rented</option><option selected="@(Model.Status == "Maintenance")">Maintenance</option></select></label><label>Sort by<select name="Sort"><option value="Newest" selected="@(Model.Sort == "Newest")">Newest first</option><option value="RateAsc" selected="@(Model.Sort == "RateAsc")">Lowest rate</option><option value="RateDesc" selected="@(Model.Sort == "RateDesc")">Highest rate</option></select></label><button class="button button-ghost" type="submit">Apply</button></form>
-<section class="admin-panel table-panel vehicle-table-panel"><div class="panel-heading"><h2>Fleet <span class="muted">(@Model.Vehicles.Count)</span></h2></div><div class="table-scroll"><table class="data-table"><thead><tr><th>Image</th><th>Make & model</th><th>Year</th><th>Type</th><th>License plate</th><th>Daily rate</th><th>Status</th><th>Actions</th></tr></thead><tbody>
-@foreach (Car car in Model.Vehicles)
-{
-    <tr><td><span class="table-thumb vehicle-thumb photo-@car.ImageSlot"></span></td><td><strong>@car.DisplayName</strong><small class="table-subline">@car.Transmission · @car.Seats seats</small></td><td>@car.Year</td><td><span class="type-chip">@car.Category</span></td><td>@car.LicensePlate</td><td>₱@car.PricePerDay.ToString("N0")</td><td><span class="status-chip @(car.Status == "Available" ? "status-active" : car.Status == "Maintenance" ? "status-pending" : "status-cancelled")">@car.Status</span></td><td><div class="row-actions"><button class="button button-ghost" type="button" data-edit-car data-id="@car.CarID" data-brand="@car.Brand" data-model="@car.Model" data-plate="@car.LicensePlate" data-year="@car.Year" data-category="@car.Category" data-transmission="@car.Transmission" data-seats="@car.Seats" data-price="@car.PricePerDay.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-description="@car.Description" data-slot="@car.ImageSlot">Edit</button>@if (car.Status != "Rented") { <form method="post" asp-page-handler="Maintenance"><input type="hidden" name="id" value="@car.CarID" /><input type="hidden" name="maintenance" value="@(car.Status != "Maintenance")" /><button class="button button-ghost" type="submit">@(car.Status == "Maintenance" ? "Available" : "Maintenance")</button></form> }<form method="post" asp-page-handler="Delete" data-confirm="Delete @car.DisplayName? Cars with rental history cannot be deleted."><input type="hidden" name="id" value="@car.CarID" /><button class="button button-danger" type="submit">Delete</button></form></div></td></tr>
-}
-</tbody></table></div>@if (Model.Vehicles.Count == 0) { <div class="empty-state"><h3>No vehicles found</h3><p>Change the filters or add a vehicle.</p></div> }</section>
+
+<form method="get" class="admin-search filter-bar">
+    <label>Search<input name="Search" value="@Model.Search" placeholder="Make, model, or license plate" /></label>
+    <label>Vehicle type<select name="Type"><option selected="@(Model.Type == "All")">All</option>@foreach (string type in Model.Categories) { <option selected="@(Model.Type == type)">@type</option> }</select></label>
+    <label>Status<select name="Status"><option selected="@(Model.Status == "All")">All</option><option selected="@(Model.Status == "Available")">Available</option><option selected="@(Model.Status == "Rented")">Rented</option></select></label>
+    <label>Sort by<select name="Sort"><option value="Newest" selected="@(Model.Sort == "Newest")">Newest first</option><option value="RateAsc" selected="@(Model.Sort == "RateAsc")">Lowest rate</option><option value="RateDesc" selected="@(Model.Sort == "RateDesc")">Highest rate</option></select></label>
+    <button class="button button-ghost" type="submit">Apply</button>
+</form>
+
+<section class="admin-panel table-panel vehicle-table-panel">
+    <div class="panel-heading"><h2>Fleet <span class="muted">(@Model.Vehicles.Count)</span></h2></div>
+    <div class="table-scroll"><table class="data-table">
+        <thead><tr><th>Image</th><th>Make &amp; model</th><th>Year</th><th>Type</th><th>License plate</th><th>Daily rate</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+        @foreach (Car car in Model.Vehicles)
+        {
+            <tr>
+                <td><span class="table-thumb vehicle-thumb photo-@car.ImageSlot" style="@car.PhotoStyle" role="img" aria-label="@car.DisplayName photo"></span></td>
+                <td><strong>@car.DisplayName</strong><small class="table-subline">@car.Transmission · @car.Seats seats</small></td>
+                <td>@car.Year</td><td><span class="type-chip">@car.Category</span></td><td>@car.LicensePlate</td>
+                <td>₱@car.PricePerDay.ToString("N0")</td>
+                <td><span class="status-chip @(car.Status == "Available" ? "status-active" : "status-cancelled")">@car.Status</span></td>
+                <td><div class="row-actions">
+                    <button class="button button-ghost" type="button" data-edit-car data-id="@car.CarID" data-brand="@car.Brand" data-model="@car.Model" data-plate="@car.LicensePlate" data-year="@car.Year" data-category="@car.Category" data-transmission="@car.Transmission" data-seats="@car.Seats" data-price="@car.PricePerDay.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-description="@car.Description">Edit</button>
+                    <form method="post" asp-page-handler="Delete" data-confirm="Delete @car.DisplayName? Cars with rental history cannot be deleted."><input type="hidden" name="id" value="@car.CarID" /><button class="button button-danger" type="submit">Delete</button></form>
+                </div></td>
+            </tr>
+        }
+        </tbody>
+    </table></div>
+    @if (Model.Vehicles.Count == 0) { <div class="empty-state"><h3>No vehicles found</h3><p>Change the filters or add a vehicle.</p></div> }
+</section>
 <p class="table-footnote">Cars with rental history remain in the list so past reservations stay accurate.</p>
-<dialog id="add-vehicle" class="vehicle-dialog"><div class="dialog-heading"><h2>Add vehicle</h2><button type="button" data-close-dialog aria-label="Close">×</button></div><form method="post" asp-page-handler="Add" class="dialog-form"><label>Make<input name="brand" required placeholder="Toyota" /></label><label>Model<input name="model" required placeholder="Vios" /></label><label>Year<input name="year" type="number" min="1980" max="2100" value="2024" required /></label><label>Vehicle type<select name="category"><option>Sedan</option><option>Hatchback</option><option>MPV</option><option>SUV</option><option>Pickup</option><option>Van</option></select></label><label>License plate<input name="licensePlate" required placeholder="ABC 1234" /></label><label>Daily rate (₱)<input name="pricePerDay" type="number" min="1" step="0.01" required placeholder="1500" /></label><label>Transmission<select name="transmission"><option>Automatic</option><option>Manual</option></select></label><label>Seats<input name="seats" type="number" min="2" max="15" value="5" required /></label><label>Photo<select name="imageSlot">@for (int i = 1; i <= 8; i++) { <option value="@i">Photo @i</option> }</select></label><label class="span-all">Description<textarea name="description" maxlength="220" rows="3" placeholder="Short vehicle description"></textarea></label><div class="dialog-actions"><button type="button" class="button button-ghost" data-close-dialog>Cancel</button><button type="submit" class="button button-orange">Save vehicle</button></div></form></dialog>
-<dialog id="edit-vehicle" class="vehicle-dialog"><div class="dialog-heading"><h2>Edit vehicle</h2><button type="button" data-close-dialog aria-label="Close">×</button></div><form method="post" asp-page-handler="Update" class="dialog-form"><input name="id" type="hidden" /><label>Make<input name="brand" required /></label><label>Model<input name="model" required /></label><label>Year<input name="year" type="number" min="1980" max="2100" required /></label><label>Vehicle type<input name="category" required /></label><label>License plate<input name="licensePlate" required /></label><label>Daily rate (₱)<input name="pricePerDay" type="number" min="1" step="0.01" required /></label><label>Transmission<select name="transmission"><option>Automatic</option><option>Manual</option></select></label><label>Seats<input name="seats" type="number" min="2" max="15" required /></label><label>Photo<input name="imageSlot" type="number" min="1" max="8" required /></label><label class="span-all">Description<textarea name="description" maxlength="220" rows="3"></textarea></label><div class="dialog-actions"><button type="button" class="button button-ghost" data-close-dialog>Cancel</button><button type="submit" class="button button-orange">Save changes</button></div></form></dialog>
+
+<dialog id="add-vehicle" class="vehicle-dialog">
+    <div class="dialog-heading"><h2>Add vehicle</h2><button type="button" data-close-dialog aria-label="Close">×</button></div>
+    <form method="post" asp-page-handler="Add" enctype="multipart/form-data" class="dialog-form">
+        <label>Make<input name="brand" required placeholder="Toyota" /></label>
+        <label>Model<input name="model" required placeholder="Vios" /></label>
+        <label>Year<input name="year" type="number" min="1980" max="2100" value="2024" required /></label>
+        <label>Vehicle type<select name="category"><option>Sedan</option><option>Hatchback</option><option>MPV</option><option>SUV</option><option>Pickup</option><option>Van</option></select></label>
+        <label>License plate<input name="licensePlate" required placeholder="ABC 1234" /></label>
+        <label>Daily rate (₱)<input name="pricePerDay" type="number" min="1" step="0.01" required placeholder="1500" /></label>
+        <label>Transmission<select name="transmission"><option>Automatic</option><option>Manual</option></select></label>
+        <label>Seats<input name="seats" type="number" min="2" max="15" value="5" required /></label>
+        <label class="span-all photo-upload">Vehicle photo<input name="photo" type="file" accept="image/png,image/jpeg,image/webp" required /><small>PNG, JPEG, or WebP · maximum 2 MB</small><span class="upload-preview" data-upload-preview hidden></span></label>
+        <label class="span-all">Description<textarea name="description" maxlength="220" rows="3" placeholder="Short vehicle description"></textarea></label>
+        <div class="dialog-actions"><button type="button" class="button button-ghost" data-close-dialog>Cancel</button><button type="submit" class="button button-orange">Save vehicle</button></div>
+    </form>
+</dialog>
+
+<dialog id="edit-vehicle" class="vehicle-dialog">
+    <div class="dialog-heading"><h2>Edit vehicle</h2><button type="button" data-close-dialog aria-label="Close">×</button></div>
+    <form method="post" asp-page-handler="Update" enctype="multipart/form-data" class="dialog-form">
+        <input name="id" type="hidden" />
+        <label>Make<input name="brand" required /></label>
+        <label>Model<input name="model" required /></label>
+        <label>Year<input name="year" type="number" min="1980" max="2100" required /></label>
+        <label>Vehicle type<select name="category"><option>Sedan</option><option>Hatchback</option><option>MPV</option><option>SUV</option><option>Pickup</option><option>Van</option></select></label>
+        <label>License plate<input name="licensePlate" required /></label>
+        <label>Daily rate (₱)<input name="pricePerDay" type="number" min="1" step="0.01" required /></label>
+        <label>Transmission<select name="transmission"><option>Automatic</option><option>Manual</option></select></label>
+        <label>Seats<input name="seats" type="number" min="2" max="15" required /></label>
+        <label class="span-all photo-upload">Replace vehicle photo (optional)<input name="photo" type="file" accept="image/png,image/jpeg,image/webp" /><small>Leave empty to keep the current photo · maximum 2 MB</small><span class="upload-preview" data-upload-preview hidden></span></label>
+        <label class="span-all">Description<textarea name="description" maxlength="220" rows="3"></textarea></label>
+        <div class="dialog-actions"><button type="button" class="button button-ghost" data-close-dialog>Cancel</button><button type="submit" class="button button-orange">Save changes</button></div>
+    </form>
+</dialog>

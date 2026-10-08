@@ -24,3 +24,30 @@
 @media(max-width:780px){.admin-shell{display:block}.admin-sidebar{position:static;height:auto;padding:12px}.admin-brand{padding:4px 10px 14px}.admin-nav{display:flex;overflow-x:auto}.admin-nav a{white-space:nowrap}.admin-sidebar-bottom{display:flex;border-top:0;margin:10px 0 0;padding:0 10px}.admin-topbar{display:flex;padding-inline:18px}.admin-user{display:none}.admin-content{padding:18px}.dashboard-analytics,.dashboard-bottom{grid-template-columns:1fr}.split-login{grid-template-columns:1fr}.login-hero{min-height:330px;padding:25px}.login-hero-copy{margin:auto 0 0}.login-hero-copy h1{font-size:2.2rem}.login-feature-row{margin-top:10px;gap:14px}.login-right{padding:25px}.booking-steps li{grid-template-columns:1fr}.booking-steps span{display:none}.booking-steps li:not(:last-child)::after{width:50%;right:0}.admin-booking-layout{grid-template-columns:1fr}}
 @media(max-width:520px){.admin-content{padding:14px}.admin-topbar{padding:10px 14px;height:auto}.topbar-search{min-width:0}.topbar-alert{display:none}.stat-tile{min-height:115px}.type-content{flex-wrap:wrap}.donut-chart{width:145px;height:145px}.vehicle-dialog{width:100vw}.dialog-form{grid-template-columns:1fr}.booking-car-option{flex-wrap:wrap}.booking-option-photo{width:110px;height:70px}.booking-option-price{margin-left:auto}.wizard-fields{grid-template-columns:1fr}.login-hero{min-height:300px}.login-feature-row span{font-size:.66rem}.login-form-card{padding:22px}.filter-bar label,.filter-bar label:first-child input{width:100%;min-width:0}.filter-bar .button{width:100%}}
 @media print{.admin-sidebar,.admin-topbar,.print-button{display:none!important}.admin-shell{display:block}.admin-content{padding:0}.admin-body{background:white;color:black}.receipt-card{border:0;background:white;color:black;box-shadow:none}.receipt-card .detail-line{border-color:#ddd}.receipt-card .detail-line span,.receipt-card .muted{color:#555}}
+
+/* Consistent fields and the supplied AUTODOK logo. */
+.admin-brand,.login-brand{display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+.admin-brand .brand-logo{width:176px;height:59px}
+.login-brand .brand-logo{width:212px;height:71px}
+.login-card-logo{width:200px;height:67px;margin:0 auto}
+.receipt-title{align-items:center}
+.filter-bar{align-items:end}
+.filter-bar label{min-width:0;flex:1 1 150px}
+.filter-bar label:first-child{flex:2 1 250px}
+.filter-bar input,.filter-bar select,.filter-bar>input,.filter-bar>.button{height:44px;min-height:44px;box-sizing:border-box}
+.filter-bar input,.filter-bar select{width:100%;min-width:0}
+.filter-bar>input{flex:2 1 250px}
+.filter-bar label:first-child input{min-width:0}
+.dialog-form{align-items:start}
+.dialog-form label{align-content:start}
+.dialog-form input:not([type="hidden"]):not([type="file"]),.dialog-form select{height:44px;min-height:44px;box-sizing:border-box}
+.dialog-form textarea{min-height:96px;resize:vertical;font:inherit}
+.dialog-form input[type="file"]{height:auto;min-height:44px;padding:7px;font-size:.75rem}
+.dialog-form input[type="file"]::file-selector-button{background:#393634;color:var(--text);border:1px solid #6b625b;border-radius:5px;padding:7px 10px;margin-right:10px;cursor:pointer}
+.photo-upload small{font-size:.7rem;color:var(--muted);font-weight:500}
+.upload-preview{width:100%;height:125px;border-radius:7px;border:1px solid #57514d;background-repeat:no-repeat;background-color:#1d1e1f}
+.upload-preview[hidden]{display:none}
+.wizard-fields{align-items:start}
+.wizard-fields label{min-width:0;margin:0}
+.wizard-fields input:not([type="checkbox"]),.wizard-fields select{height:46px;min-height:46px}
+@media(max-width:520px){.filter-bar label,.filter-bar>input{flex-basis:100%}}
